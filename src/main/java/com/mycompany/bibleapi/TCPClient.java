@@ -16,7 +16,7 @@ class TCPClient {
     //IF NOTHING HAPPENS, CHECK THE SERVER FOR AN ERROR MESSAGE
 
     //resolved the problem where it would keep the same verse even after rerunning the client
-    //fix the problem where only one verse will print
+    //fixed the problem where only one verse will print (there was a problem reading in only one line)
     public static void main(String argv[]) throws Exception {
         String reference;
         String referenceText = "";
@@ -24,7 +24,6 @@ class TCPClient {
         BufferedReader inFromUser
                 = new BufferedReader(new InputStreamReader(System.in));
 
-        //currently running on noah's server
         Socket connectSocket = new Socket("127.0.0.1", 6789);
 
         DataOutputStream outToServer
