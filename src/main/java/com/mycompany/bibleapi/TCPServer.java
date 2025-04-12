@@ -36,24 +36,30 @@ class TCPServer {
 
         while (true) {
 
+            //learned from trial and error that these have to be reset and in the while loop so that
+            //you don't get the same verse text over and over again
+            String clientReference;
+            String clientReferenceText = "";
+
+            System.out.println("Waiting for client.......");
+
+            Socket connectSocket = doorbellSocket.accept();
+
+            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectSocket.getInputStream()));
+
+            DataOutputStream outToClient
+                    = new DataOutputStream(connectSocket.getOutputStream());
+
+            //HERE IS WHERE STUFF IS TAKEN IN AND MODIFIED
+            clientReference = inFromClient.readLine();
+
+            //if they input quit, end the current task
+            if (clientReference.equalsIgnoreCase("quit")) {
+                continue;
+            }
+            
+            //try and catch to catch an error retrieving the verse text
             try {
-
-                //learned from trial and error that these have to be reset and in the while loop so that
-                //you don't get the same verse text over and over again
-                String clientReference;
-                String clientReferenceText = "";
-
-                System.out.println("Waiting for client.......");
-
-                Socket connectSocket = doorbellSocket.accept();
-
-                BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectSocket.getInputStream()));
-
-                DataOutputStream outToClient
-                        = new DataOutputStream(connectSocket.getOutputStream());
-
-                //HERE IS WHERE STUFF IS TAKEN IN AND MODIFIED
-                clientReference = inFromClient.readLine();
 
                 //here is where we get the api and the bible verse text
                 //Creating Request
@@ -103,7 +109,15 @@ class TCPServer {
                 connectSocket.close();
 
             } catch (IOException | URISyntaxException | JSONException e) {
+
                 System.out.println("Error!");
+
+                //sending the text to the client
+                outToClient.writeBytes("An error occurred: Verse Not Found");
+
+                //close the socket 
+                connectSocket.close();
+
             }
 
         }

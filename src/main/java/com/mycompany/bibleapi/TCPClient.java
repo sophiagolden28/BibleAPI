@@ -12,56 +12,66 @@ import java.io.*;
 import java.net.*;
 
 class TCPClient {
-    
-    //IF NOTHING HAPPENS, CHECK THE SERVER FOR AN ERROR MESSAGE
 
+    //IF NOTHING HAPPENS, CHECK THE SERVER FOR AN ERROR MESSAGE
     //resolved the problem where it would keep the same verse even after rerunning the client
     //fixed the problem where only one verse will print (there was a problem reading in only one line)
     public static void main(String argv[]) throws Exception {
-        String reference;
-        String referenceText = "";
 
-        BufferedReader inFromUser
-                = new BufferedReader(new InputStreamReader(System.in));
+        while (true) {
 
-        Socket connectSocket = new Socket("127.0.0.1", 6789);
+            String reference;
+            String referenceText = "";
 
-        DataOutputStream outToServer
-                = new DataOutputStream(connectSocket.getOutputStream());
+            BufferedReader inFromUser
+                    = new BufferedReader(new InputStreamReader(System.in));
 
-        BufferedReader inFromServer
-                = new BufferedReader(new InputStreamReader(connectSocket.getInputStream()));
+            Socket connectSocket = new Socket("127.0.0.1", 6789);
 
-        //TAKE IN VERSE FORMATTED TEXT FROM INPUT after telling them how to format it
-        System.out.println("Which Bible verse would you like the text for?\n(Format your answer like this: book+chapter:verse (example: john+1:1))");
-        reference = inFromUser.readLine();
+            DataOutputStream outToServer
+                    = new DataOutputStream(connectSocket.getOutputStream());
 
-        //give the server the reference
-        outToServer.writeBytes(reference + "\n");
+            BufferedReader inFromServer
+                    = new BufferedReader(new InputStreamReader(connectSocket.getInputStream()));
 
-        //try-catch in case they don't put the format in right or something
-        try {
+            //TAKE IN VERSE FORMATTED TEXT FROM INPUT after telling them how to format it
+            System.out.println("Which Bible verse would you like the text for?\n(Format your answer like this: book+chapter:verse (example: john+1:1))\nType 'quit' to quit.");
+            reference = inFromUser.readLine();
 
-            //ERROR WAS ONLY READING IN ONLY THE ONE LINE, now using a loop to get all the lines  
-            
-            //get the lines
-            String line;
-            while ((line = inFromServer.readLine()) != null) {
-                referenceText += line + "\n";
+            //give the server the reference (before we check if they want to quit so that the server can restart)
+            outToServer.writeBytes(reference + "\n");
+
+            //put in a little conditional here to break the loop and close the socket if the user wishes to quit
+            if (reference.equalsIgnoreCase("quit")) {
+                connectSocket.close();
+                break;
             }
 
-            //referenceText = inFromServer.readLine();
-            //print the text
-            System.out.println("\nVerse text found:\n" + referenceText);
+            //try-catch in case they don't put the format in right or something
+            try {
 
-            connectSocket.close();
+                //ERROR WAS ONLY READING IN ONLY THE ONE LINE, now using a loop to get all the lines  
+                //get the lines
+                String line;
+                while ((line = inFromServer.readLine()) != null) {
+                    referenceText += line + "\n";
+                }
 
-        } catch (Exception e) {
+                //referenceText = inFromServer.readLine();
+                //print the text
+                System.out.println("\n\nVerse text found:\n" + referenceText);
 
-            System.out.println("Error: Verse Not Found");
-            connectSocket.close();
+                connectSocket.close();
+
+            } catch (IOException e) {
+
+                System.out.println("Error: Verse Not Found");
+                connectSocket.close();
+
+            }
 
         }
 
     }
+
 }
